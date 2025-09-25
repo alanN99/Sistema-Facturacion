@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from functools import wraps
 from datetime import date
 from models.usuarios import db, Usuarios
 from models.productos import db, Productos
@@ -7,8 +8,8 @@ from models.facturas import db, Facturas
 from models.detalle_factura import db, DetalleFactura
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['SECRET_KEY'] = 'clave_secreta'
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+app.config["SECRET_KEY"] = "clave_secreta"
 db.init_app(app)
 
 @app.before_request
@@ -16,54 +17,101 @@ def create_tables():
     db.create_all()
 
 # INICIO SESION
-@app.route('/login', methods=['GET', 'POST'])
+
+@app.route("/")
+def home():
+    return redirect(url_for("login"))
+
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "user_id" not in session:
+            flash("Debes iniciar sesión", "danger")
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return wrapper
+
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "user_id" not in session:
+            flash("Debes iniciar sesión", "danger")
+            return redirect(url_for("login"))
+        if session.get("rol") != 1:
+            flash("No tienes permisos de administrador", "danger")
+            return redirect(url_for("dashboard"))
+        return f(*args, **kwargs)
+    return wrapper
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
     
         user = Usuarios.query.filter_by(username=username,
         password=password).first()        
     
         if user:
-            flash('Login exitoso!', 'success')
-            return redirect(url_for('dashboard'))
+            session["user_id"] = user.id
+            session["username"] = user.username
+            session["rol"] = user.rol   # 1=Admin, 2=Usuario
+            flash("Login exitoso!", "success")
+            return redirect(url_for("dashboard"))
         else:
-            flash('Usuario o contraseña incorrectos', 'danger')
-            return redirect(url_for('login'))        
-    return render_template('login.html')
+            flash("Usuario o contraseña incorrectos", "danger")
+            return redirect(url_for("login"))        
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Sesión cerrada", "info")
+    return redirect(url_for("login"))
 
 # USUARIOS
-@app.route('/agregar/usuario', methods=['GET', 'POST'])
+@app.route("/agregar/usuario", methods=["GET", "POST"])
 def agregar_usuario():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        rol = int(request.form['rol'])
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        rol = int(request.form["rol"])
         user = Usuarios(username=username, password=password, rol=rol)
         
         if user == Usuarios.query.filter_by(username=user.username):
-            flash('El usuario ya existe', 'warning')
-            return redirect(url_for('agregar_usuario'))
+            flash("El usuario ya existe", "warning")
+            return redirect(url_for("agregar_usuario"))
         
         db.session.add(user)
         db.session.commit()
         
-    flash('Registro exitoso!', 'success')
-    return render_template('gestor_usuarios.html')
-    # return redirect(url_for('login'))
-        
+        flash("Registro exitoso!", "success")
+        return redirect(url_for('login'))
+    return render_template("gestor_usuarios.html")
+
+@app.route("/usuarios/")
+@login_required
+@admin_required
+def listaUsuarios():
+    usuarios = Usuarios.query.all()
+    return render_template("usuarios.html", usuarios = usuarios)
         
 @app.route("/eliminar/usuario/<int:id>")
 def eliminar_usuario(id):
-    usuario = Usuarios.query.get(id)
+    user = Usuarios.query.get(id)
+        
+    if session.get("user_id") == user.id:
+        flash("No se puede borrar el usuario logeado", "warning")
+        return redirect(url_for("listaUsuarios"))
     
-    db.session.delete(usuario)
+    db.session.delete(user)
     db.session.commit()
-    return redirect(url_for("agregar_usuario"))
+    return redirect(url_for("listaUsuarios"))
 
 # PRODUCTOS
 @app.route("/productos")
+@login_required
+@admin_required
 def listaProductos():
     productos = Productos.query.all()
     return render_template("productos.html", productos = productos)
@@ -83,10 +131,12 @@ def agregar_producto():
         db.session.add(nuevo)
         db.session.commit()
         
-        return redirect(url_for('listaProductos'))
-    return render_template('gestor_productos.html')
+        return redirect(url_for("listaProductos"))
+    
+    productos = Productos.query.all()
+    return render_template("gestor_productos.html", productos = productos)
 
-@app.route('/editar/producto/<int:id>', methods=["GET", "POST"])
+@app.route("/editar/producto/<int:id>", methods=["GET", "POST"])
 def editar_producto(id):
     producto = Productos.query.get_or_404(id)
     if request.method == "POST":
@@ -98,7 +148,7 @@ def editar_producto(id):
         flash("Producto actualizado", "success")
         return redirect(url_for("listaProductos"))
     
-    return render_template('editar_producto.html', producto=producto)
+    return render_template("editar_producto.html", producto=producto)
 
 @app.route("/eliminar/producto/<int:id>")
 def eliminar_producto(id):
@@ -106,7 +156,7 @@ def eliminar_producto(id):
     
     db.session.delete(producto)
     db.session.commit()
-    return redirect(url_for('listaProductos'))
+    return redirect(url_for("listaProductos"))
 
 # CLIENTES
 @app.route("/agregar/cliente", methods=["POST", "GET"])
@@ -128,14 +178,17 @@ def nuevo_cliente():
         flash("Cliente creado", "success")
         return redirect(url_for('listaClientes'))
     
-    return render_template('gestor_clientes.html')
+    clientes = Clientes.query.all()
+    return render_template("gestor_clientes.html", clientes= clientes)
 
 @app.route("/clientes", methods=["GET"])
+@login_required
+@admin_required
 def listaClientes():
     clientes = Clientes.query.all()
     return render_template("clientes.html", clientes = clientes)
 
-@app.route('/clientes/editar/<int:id>', methods=['GET', 'POST'])
+@app.route("/clientes/editar/<int:id>", methods=["GET", "POST"])
 def editar_cliente(id):
     cliente = Clientes.query.get_or_404(id)
     if request.method == "POST":
@@ -148,11 +201,11 @@ def editar_cliente(id):
         flash("Cliente actualizado", "success")
         return redirect(url_for("listaClientes"))
     
-    return render_template('editar_cliente.html', cliente=cliente)
+    return render_template("editar_cliente.html", cliente=cliente)
 
 @app.route("/clientes/eliminar/<int:id>")
 def eliminar_cliente(id):
-    cliente = Clientes.query.get_or_404(id)
+    cliente = Clientes.query.get(id)
     db.session.delete(cliente)
     db.session.commit()
     flash("Cliente eliminado", "success")
@@ -179,7 +232,7 @@ def nueva_factura():
 
 @app.route("/factura/<int:id_factura>/agregar", methods=["GET", "POST"])
 def agregar_productos(id_factura):
-    factura = Facturas.query.get_or_404(id_factura)
+    factura = Facturas.query.get(id_factura)
     productos = Productos.query.all()
 
     if request.method == "POST":
@@ -225,13 +278,14 @@ def listaFacturas():
     return render_template("facturas.html", facturas = facturas)
 
 @app.route('/consultar/factura/<int:id>', methods=["GET"])
-def consultar_factura(id_factura):
-    detalleFactura = DetalleFactura.query.get_or_404(id_factura)
+def consultar_factura(id):
+    factura = Facturas.query.get(id)
+    detalleFactura = DetalleFactura.query.filter_by(id_factura=factura.id).all()
     return render_template('detalle_factura.html', detalleFactura=detalleFactura)
 
 @app.route("/eliminar/factura/int:<id>")
 def eliminar_factura(id):
-    factura = Facturas.query.get_or_404(id)
+    factura = Facturas.query.get(id)
     db.session.delete(factura)
     db.session.commit()
     flash("Factura eliminada", "success")
