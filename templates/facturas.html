@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facturas</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+</head>
+
+<h1>Facturas</h1>
+<hr>
+<h3>Listado de facturas</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>ID Cliente</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in facturas %}
+        <tr>
+            <td>{{ f.id }}</td>
+            <td>{{ f.id_cliente }}</td>
+            <td>{{ f.fecha }}</td>
+            <td>{{ f.total }}</td>
+            <td>
+                <a href="{{ url_for('consultar_factura', id=f.id) }}" class="btn btn-primary btn-sm">Detalle</a>
+                <a href="{{ url_for('eliminar_factura', id=f.id) }}" class="btn btn-danger btn-sm">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('nueva_factura') }}" class="btn btn-success">Nueva Factura</a>
+<a href="{{ url_for('dashboard') }}" class="btn btn-primary">Volver</a>
