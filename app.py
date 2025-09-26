@@ -209,7 +209,7 @@ def eliminar_cliente(id):
     db.session.delete(cliente)
     db.session.commit()
     flash("Cliente eliminado", "success")
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("listaClientes"))
 
 # FACTURAS
 @app.route("/agregar/factura", methods=["GET", "POST"])
