@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Cliente</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+        
+        .edit-box {
+            max-width: 600px;
+            margin: 50px auto;
+        }
+    </style>
+</head>
+
+<body class="hold-transition">
+
+    <div class="edit-box">
+        <div class="card card-outline card-warning">
+            <div class="card-header text-center">
+                <h3 class="card-title">Editar Cliente</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('editar_cliente', id=cliente.id) }}" method="post">
+
+                    <div class="input-group mb-3">
+                        <input type="text" name="nombre" class="form-control" placeholder="Nombre" value="{{ cliente.nombre }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-user"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="text" name="direccion" class="form-control" placeholder="Dirección" value="{{ cliente.direccion }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-map-marker-alt"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="number" name="telefono" class="form-control" placeholder="Teléfono" value="{{ cliente.telefono }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-phone"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="email" name="email" class="form-control" placeholder="Email" value="{{ cliente.email }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-envelope"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-warning btn-block">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('listaClientes') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Volver al listado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+</body>
+
+</html>

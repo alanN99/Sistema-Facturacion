@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Producto</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+        
+        .edit-box {
+            max-width: 600px;
+            margin: 50px auto;
+        }
+    </style>
+</head>
+
+<body class="hold-transition">
+
+    <div class="edit-box">
+        <div class="card card-outline card-warning">
+            <div class="card-header text-center">
+                <h3 class="card-title">Editar Producto</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('editar_producto', id=producto.id) }}" method="post">
+
+                    <div class="input-group mb-3">
+                        <input type="text" name="descripcion" class="form-control" placeholder="Descripción" value="{{ producto.descripcion }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-box"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="number" step="0.01" name="precio" class="form-control" placeholder="Precio" value="{{ producto.precio }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-dollar-sign"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="number" name="stock" class="form-control" placeholder="Stock" value="{{ producto.stock }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-layer-group"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-warning btn-block">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('listaProductos') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Volver al listado
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+</body>
+
+</html>

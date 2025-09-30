@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link btn btn-danger text-white" href="{{ url_for('logout') }}">Cerrar sesión</a>
+                </li>
+            </ul>
+        </nav>
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="#" class="brand-link text-center">
+                <span class="brand-text font-weight-bold">Mi Dashboard</span>
+            </a>
+            <div class="sidebar">
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview">
+                        {% if session.rol == 1 %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('listaUsuarios') }}" class="nav-link">
+                                <i class="fas fa-users nav-icon"></i>
+                                <p>Gestión de usuarios</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('listaClientes') }}" class="nav-link">
+                                <i class="fas fa-address-book nav-icon"></i>
+                                <p>Gestión de clientes</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('listaProductos') }}" class="nav-link">
+                                <i class="fas fa-box-open nav-icon"></i>
+                                <p>Gestión de productos</p>
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('listaFacturas') }}" class="nav-link">
+                                <i class="fas fa-file-invoice nav-icon"></i>
+                                <p>Gestión de facturas</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <div class="content-wrapper">
+            <div class="content-header">
+                <div class="container-fluid">
+                    <h1 class="m-0">Panel de Control</h1>
+                    <p>Bienvenido, <strong>{{ session.username }}</strong></p>
+                    <hr>
+                </div>
+            </div>
+            <div class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        {% if session.rol == 1 %}
+                        <div class="col-lg-3 col-6">
+                            <div class="info-box bg-primary">
+                                <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Usuarios</span>
+                                    <a href="{{ url_for('listaUsuarios') }}" class="btn btn-light btn-sm mt-1">Ir</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-6">
+                            <div class="info-box bg-success">
+                                <span class="info-box-icon"><i class="fas fa-address-book"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Clientes</span>
+                                    <a href="{{ url_for('listaClientes') }}" class="btn btn-light btn-sm mt-1">Ir</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-6">
+                            <div class="info-box bg-warning">
+                                <span class="info-box-icon"><i class="fas fa-box-open"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Productos</span>
+                                    <a href="{{ url_for('listaProductos') }}" class="btn btn-light btn-sm mt-1">Ir</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="col-lg-3 col-6">
+                            <div class="info-box bg-info">
+                                <span class="info-box-icon"><i class="fas fa-file-invoice"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Facturas</span>
+                                    <a href="{{ url_for('listaFacturas') }}" class="btn btn-light btn-sm mt-1">Ir</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+</body>
+
+</html>
